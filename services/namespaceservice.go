@@ -13,7 +13,7 @@ func GetAllNamespaces() (*corev1.NamespaceList, error) {
 		return nil, err
 	}
 
-	namespacesRequest := client.AppsV1().RESTClient().Get().RequestURI("api/v/namespaces").Do()
+	namespacesRequest := client.AppsV1().RESTClient().Get().RequestURI("api/v1/namespaces").Do()
 	names, err := namespacesRequest.Get()
 
 	if err != nil {
