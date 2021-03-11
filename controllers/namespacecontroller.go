@@ -3,14 +3,20 @@ package controllers
 import (
 	"k8sclientgo/models"
 	"k8sclientgo/services"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
+type NamespaceController struct{}
+
 //GetAllNamespaces Retorna todos namespaces do cluster
-func GetAllNamespaces() ([]models.Namespace, error) {
+func (namespace *NamespaceController) GetAllNamespaces(context *gin.Context) {
 	namespaces, err := services.GetAllNamespaces()
 
 	if err != nil {
-		return nil, err
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	namespacesObjs := make([]models.Namespace, 0)
@@ -19,5 +25,5 @@ func GetAllNamespaces() ([]models.Namespace, error) {
 		namespacesObjs = append(namespacesObjs, models.Namespace{Name: value.Name, CreatedAt: value.CreationTimestamp.Time})
 	}
 
-	return namespacesObjs, nil
+	context.JSON(http.StatusOK, namespacesObjs)
 }

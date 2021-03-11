@@ -10,34 +10,26 @@ import (
 func main() {
 	r := gin.Default()
 
-	r.GET("/deployment", func(context *gin.Context) {
-		deployments, err := controllers.GetAllDeployments()
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		context.JSON(http.StatusOK, deployments)
+	v1 := r.Group("/api/v1")
+	{
+
+		deploymentController := new(controllers.DeploymentController)
+		namespaceController := new(controllers.NamespaceController)
+		podController := new(controllers.PodController)
+
+		// Deployments
+		v1.GET("/deployment", deploymentController.GetAllDeployments)
+
+		// Namespaces
+		v1.GET("/namespace", namespaceController.GetAllNamespaces)
+
+		//Pods
+		v1.GET("/pod", podController.GetAllPods)
+	}
+
+	r.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Not found"})
 	})
 
-	r.GET("/namespace", func(context *gin.Context) {
-		namespaces, err := controllers.GetAllNamespaces()
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		context.JSON(http.StatusOK, namespaces)
-	})
-
-	r.GET("/pod", func(context *gin.Context) {
-		pods, err := controllers.GetAllPods()
-
-		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		context.JSON(http.StatusOK, pods)
-	})
-
-	_ = r.Run()
+	r.Run(":8080")
 }

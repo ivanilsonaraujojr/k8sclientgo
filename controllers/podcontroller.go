@@ -3,13 +3,19 @@ package controllers
 import (
 	"k8sclientgo/models"
 	"k8sclientgo/services"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-func GetAllPods() ([]models.Pod, error) {
+type PodController struct{}
+
+func (pod *PodController) GetAllPods(context *gin.Context) {
 	pods, err := services.GetAllPods()
 
 	if err != nil {
-		return nil, err
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	podsObjs := make([]models.Pod, 0)
@@ -24,5 +30,5 @@ func GetAllPods() ([]models.Pod, error) {
 			Namespace: value.Namespace, Containers: containers})
 	}
 
-	return podsObjs, nil
+	context.JSON(http.StatusOK, podsObjs)
 }

@@ -3,15 +3,21 @@ package controllers
 import (
 	"k8sclientgo/models"
 	"k8sclientgo/services"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
+type DeploymentController struct{}
+
 //GetAllDeployments Retorna todos deployments do cluster
-func GetAllDeployments() ([]models.Deployment, error) {
+func (deployment *DeploymentController) GetAllDeployments(context *gin.Context) {
 
 	deployments, err := services.GetAllDeployments()
 
 	if err != nil {
-		return nil, err
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	deploymentsObjs := make([]models.Deployment, 0)
@@ -20,5 +26,5 @@ func GetAllDeployments() ([]models.Deployment, error) {
 		deploymentsObjs = append(deploymentsObjs, models.Deployment{Name: value.Name, Labels: value.Labels, Replicas: *value.Spec.Replicas, Namespace: value.Namespace})
 	}
 
-	return deploymentsObjs, nil
+	context.JSON(http.StatusOK, deploymentsObjs)
 }
